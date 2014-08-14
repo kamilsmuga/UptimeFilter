@@ -1,10 +1,7 @@
 package uptime
 
 import (
-	"errors"
-	"fmt"
-	"github.com/mozilla-services/heka/message"
-	. "github.com/mozilla-services/heka/pipeline"
+	"github.com/mozilla-services/heka/pipeline"
 )
 
 type UptimeFilter struct {
@@ -16,11 +13,12 @@ type UptimeFilter struct {
 	lastUptime    uint32
 	totalUptime   uint32
 	// true if uptime dropped
-	dived bool
+	dived  bool
+	output string
 }
 
 func (f *UptimeFilter) Init(config interface{}) error {
-	return
+
 }
 
 func (f *UptimeFilter) Run(runner FilterRunner, helper PluginHelper) (err error) {
@@ -28,9 +26,10 @@ func (f *UptimeFilter) Run(runner FilterRunner, helper PluginHelper) (err error)
 		pack    *PipelinePack
 		output  OutputRunner
 		payload string
+		ok      bool
 	)
 	if output, ok = helper.Output(f.output); !ok {
-		runner.LogError("No output: %s", output)
+		runner.LogError("No output: ")
 		return
 	}
 	inChan := runner.InChan()
@@ -43,7 +42,7 @@ func (f *UptimeFilter) Run(runner FilterRunner, helper PluginHelper) (err error)
 }
 
 func init() {
-	pipeline.RegisterPlugin("UptimeFilter", func() interface{} {
+	RegisterPlugin("UptimeFilter", func() interface{} {
 		return new(UptimeFilter)
 	})
 }
