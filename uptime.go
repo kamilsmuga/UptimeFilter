@@ -18,20 +18,15 @@ type UptimeFilter struct {
 }
 
 func (f *UptimeFilter) Init(config interface{}) error {
-
+	return nil
 }
 
-func (f *UptimeFilter) Run(runner FilterRunner, helper PluginHelper) (err error) {
+func (f *UptimeFilter) Run(runner pipeline.FilterRunner, helper pipeline.PluginHelper) (err error) {
 	var (
-		pack    *PipelinePack
-		output  OutputRunner
+		pack    *pipeline.PipelinePack
 		payload string
-		ok      bool
 	)
-	if output, ok = helper.Output(f.output); !ok {
-		runner.LogError("No output: ")
-		return
-	}
+
 	inChan := runner.InChan()
 	for pack = range inChan {
 		payload = pack.Message.GetPayload()
@@ -42,7 +37,7 @@ func (f *UptimeFilter) Run(runner FilterRunner, helper PluginHelper) (err error)
 }
 
 func init() {
-	RegisterPlugin("UptimeFilter", func() interface{} {
+	pipeline.RegisterPlugin("UptimeFilter", func() interface{} {
 		return new(UptimeFilter)
 	})
 }
