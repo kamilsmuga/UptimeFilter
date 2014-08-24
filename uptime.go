@@ -30,9 +30,9 @@ func (f *UptimeFilter) Run(runner pipeline.FilterRunner, helper pipeline.PluginH
 	inChan := runner.InChan()
 	for pack = range inChan {
 		payload = pack.Message.GetPayload()
+		runner.LogMessage(payload)
+		pack.Recycle()
 	}
-	runner.LogMessage(payload)
-	pack.Recycle()
 	return
 }
 
