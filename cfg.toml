@@ -7,3 +7,20 @@ message_matcher = "Payload =~ /uptime/"
 [UdpInput]
 address = "127.0.0.1:4880"
 parser_type = "token"
+
+# This configuration assumes that collectd is configured
+# to send UDP payloads on port 4880.
+# This can be achieved by using write_graphite plugin with 
+# following configuration:
+# <Node "hekad">
+#    Host "localhost"
+#    Port "4880"
+#    Protocol "udp"
+#    LogSendErrors true
+#    Prefix "collectd_"
+#    Postfix "collectd"
+#    StoreRates true
+#    AlwaysAppendDS false
+#    EscapeCharacter "_"
+# </Node>
+
