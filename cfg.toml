@@ -1,0 +1,9 @@
+[hekad]
+maxprocs = 4
+
+[UptimeFilter]
+message_matcher = "Payload =~ /uptime/"
+
+[UdpInput]
+address = "127.0.0.1:4880"
+parser_type = "token"
