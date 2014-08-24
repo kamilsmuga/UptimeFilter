@@ -19,7 +19,7 @@ type UptimeFilter struct {
 	// true if uptime dropped
 	dived  bool
 	output string
-	hours  map[string]bool
+	hours  map[int64]bool
 }
 
 func (f *UptimeFilter) Init(config interface{}) error {
@@ -37,10 +37,18 @@ func (f *UptimeFilter) Run(runner pipeline.FilterRunner, helper pipeline.PluginH
 		payload = pack.Message.GetPayload()
 		runner.LogMessage("Payload: " + payload)
 		if f.hours == nil {
-			f.hours = make(map[string]bool)
+			f.hours = make(map[int64]bool)
 		}
 		var epoch int64 = f.GetEpoch(payload)
 		f.startHour, f.endHour = f.FigureOutStartAndEndHour(epoch)
+		if !f.hours[f.startHour] {
+			f.initialUptime = f.GetUptime(payload)
+			f.lastUptime = f.initialUptime
+			f.totalUptime = f.initialUptime
+			f.dived = false
+			f.hours[f.startHour] = true
+			log.Printf("Stuff for hour: %d intialized", f.startHour)
+		}
 		log.Printf("Start hour: %d", f.startHour)
 		log.Printf("End hour: %d", f.endHour)
 		log.Printf("EPOCH: %d", epoch)
@@ -60,10 +68,23 @@ func (f *UptimeFilter) GetEpoch(payload string) (epoch int64) {
 	if len(split) < 3 {
 		return 1
 	}
-	if bar, err := strconv.Atoi(strings.TrimSpace(split[2])); err == nil {
-		return int64(bar)
+	if epochValue, err := strconv.Atoi(strings.TrimSpace(split[2])); err == nil {
+		return int64(epochValue)
 	} else {
-		log.Printf("Error while trying to convert Epoch string to uint32: %s", err)
+		log.Printf("Error while trying to convert Epoch string to int64: %s", err)
+	}
+	return 0
+}
+
+func (f *UptimeFilter) GetUptime(payload string) (uptime int64) {
+	split := strings.Split(payload, " ")
+	if len(split) < 3 {
+		return 1
+	}
+	if uptimeValue, err := strconv.ParseFloat(split[1], 64); err == nil {
+		return int64(uptimeValue)
+	} else {
+		log.Printf("Error while trying to convert Uptime string to int64: %s", err)
 	}
 	return 0
 }
